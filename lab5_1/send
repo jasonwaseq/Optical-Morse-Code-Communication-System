@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+import sys, time
+from gpiozero import LED
+
+# Use GPIO 17 (physical pin 11)
+led = LED(17)
+
+# Morse code dictionary
+MORSE_CODE = {
+    'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..',
+    'E': '.',  'F': '..-.', 'G': '--.',  'H': '....',
+    'I': '..', 'J': '.---', 'K': '-.-',  'L': '.-..',
+    'M': '--', 'N': '-.',   'O': '---',  'P': '.--.',
+    'Q': '--.-','R': '.-.', 'S': '...',  'T': '-',
+    'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+    'Y': '-.--','Z': '--..', '0': '-----','1': '.----',
+    '2': '..---','3': '...--','4': '....-','5': '.....',
+    '6': '-....','7': '--...','8': '---..','9': '----.',
+    ' ': ' '  # space between words
+}
+
+# Timing (in seconds)
+DOT = 0.2
+DASH = DOT * 3
+INTRA_CHAR = DOT
+INTER_CHAR = DOT * 3
+INTER_WORD = DOT * 7
+
+def send_morse(message):
+    for ch in message.upper():
+        if ch == ' ':
+            time.sleep(INTER_WORD)
+            continue
+        code = MORSE_CODE.get(ch, '')
+        for symbol in code:
+            if symbol == '.':
+                led.on(); time.sleep(DOT)
+            elif symbol == '-':
+                led.on(); time.sleep(DASH)
+            led.off()
+            time.sleep(INTRA_CHAR)
+        time.sleep(INTER_CHAR)
+
+def main():
+    if len(sys.argv) != 3:
+        print("Usage: ./send <count> <message>")
+        sys.exit(1)
+    count = int(sys.argv[1])
+    message = sys.argv[2]
+
+    for i in range(count):
+        print(f"Sending message {i+1}: {message}")
+        send_morse(message)
+        time.sleep(2)  # pause between repetitions
+
+if __name__ == "__main__":
+    main()
